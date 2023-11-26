@@ -11,8 +11,10 @@ else
     echo "development"
     export BUILD_ENV=development
     # Uncomment the following line if there has been an update to overcooked-ai code
-    # docker-compose build --no-cache
-
+    if [[ $1 = re* ]];
+    then 
+        docker-compose build --no-cache
+    fi
     # Force re-build of all images but allow use of build cache if possible
     docker-compose up --build
 fi
