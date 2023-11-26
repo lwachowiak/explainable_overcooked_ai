@@ -9,7 +9,8 @@ import dill
 import gym
 import numpy as np
 import ray
-from ray.rllib.agents.ppo import PPOTrainer
+# from ray.rllib.agents.ppo import PPOTrainer
+from ray.rllib.algorithms.ppo import PPO
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.rllib.models import ModelCatalog
@@ -237,7 +238,7 @@ class OvercookedMultiAgent(MultiAgentEnv):
         )
 
         # bc observation
-        featurize_fn_bc = lambda state: self.base_env.featurize_state_mdp(
+        def featurize_fn_bc(state): return self.base_env.featurize_state_mdp(
             state
         )
         obs_shape = featurize_fn_bc(dummy_state)[0].shape
@@ -572,7 +573,8 @@ def get_rllib_eval_function(
         if "bc" in policies:
             base_ae = get_base_ae(eval_mdp_params, env_params)
             base_env = base_ae.env
-            bc_featurize_fn = lambda state: base_env.featurize_state_mdp(state)
+            def bc_featurize_fn(
+                state): return base_env.featurize_state_mdp(state)
             if policies[0] == "bc":
                 agent_0_feat_fn = bc_featurize_fn
             if policies[1] == "bc":
@@ -780,7 +782,7 @@ def gen_trainer_from_params(params):
         environment_params["eval_mdp_params"] = environment_params[
             "mdp_params"
         ]
-    trainer = PPOTrainer(
+    trainer = PPO(  # PPOTrainer before
         env="overcooked_multi_agent",
         config={
             "multiagent": multi_agent_config,
