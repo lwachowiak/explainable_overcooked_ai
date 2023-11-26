@@ -60,7 +60,7 @@ setup(
             "matplotlib",
             "requests",
             "seaborn==0.9.0",
-            "ray[rllib],
+            "ray[rllib]",
             "protobuf",
             "tensorflow==2.10",
         ]
