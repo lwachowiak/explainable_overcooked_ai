@@ -220,6 +220,52 @@ class AgentFromPolicy(Agent):
         self.policy.mdp = None
 
 
+class PopfAgent(Agent):
+    """
+    An agent that uses the popf planner from rosplan to come up with the next action. TODO: currently random actions
+    """
+
+    def __init__(self, sim_threads=None, all_actions=False, custom_wait_prob=None):
+        print("Popf agent initiated")
+        self.sim_threads = sim_threads
+        self.all_actions = all_actions
+        self.custom_wait_prob = custom_wait_prob
+
+    def action(self, state):
+        print("Current State", state)
+        action_probs = np.zeros(Action.NUM_ACTIONS)
+        legal_actions = list(Action.MOTION_ACTIONS)
+        print("Legal actions", actions)
+        if self.all_actions:
+            legal_actions = Action.ALL_ACTIONS
+        legal_actions_indices = np.array(
+            [Action.ACTION_TO_INDEX[motion_a] for motion_a in legal_actions]
+        )
+        action_probs[legal_actions_indices] = 1 / len(legal_actions_indices)
+
+        if self.custom_wait_prob is not None:
+            stay = Action.STAY
+            if np.random.random() < self.custom_wait_prob:
+                return stay, {"action_probs": Agent.a_probs_from_action(stay)}
+            else:
+                action_probs = Action.remove_indices_and_renormalize(
+                    action_probs, [Action.ACTION_TO_INDEX[stay]]
+                )
+
+        return Action.sample(action_probs), {"action_probs": action_probs}
+
+    def actions(self, states, agent_indices):
+        return [self.action(state) for state in states]
+
+    def direct_action(self, obs):
+        return [np.random.randint(4) for _ in range(self.sim_threads)]
+
+
+popf_agent = PopfAgent()
+popf_agent.save("src/overcooked_demo/server/static/assets/agents/PopfAgent/")
+print("saved")
+
+
 class RandomAgent(Agent):
     """
     An agent that randomly picks motion actions.
@@ -318,7 +364,8 @@ class GreedyHumanModel(Agent):
         self.mdp = self.mlam.mdp
 
         # Bool for perfect rationality vs Boltzmann rationality for high level and low level action selection
-        self.hl_boltzmann_rational = hl_boltzmann_rational  # For choices among high level goals of same type
+        # For choices among high level goals of same type
+        self.hl_boltzmann_rational = hl_boltzmann_rational
         self.ll_boltzmann_rational = (
             ll_boltzmann_rational  # For choices about low level motion
         )

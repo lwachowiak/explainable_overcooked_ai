@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 from queue import Empty, Full, LifoQueue, Queue
 from threading import Lock, Thread
 from time import time
+import dill
+import numpy as np
 
 import ray
 from utils import DOCKER_VOLUME, create_dirs
@@ -37,8 +39,6 @@ def fix_bc_path(path):
     Loading a PPO agent trained with a BC agent requires loading the BC model as well when restoring the trainer, even though the BC model is not used in game
     For now the solution is to include the saved BC model and fix the relative path to the model in the config.pkl file
     """
-
-    import dill
 
     # the path is the agents/Rllib.*/agent directory
     agent_path = os.path.dirname(path)
@@ -95,6 +95,7 @@ class Game(ABC):
         self.id = kwargs.get("id", id(self))
         self.lock = Lock()
         self._is_active = False
+        print("game created", self.id)
 
     @abstractmethod
     def is_full(self):
@@ -672,6 +673,7 @@ class OvercookedGame(Game):
         return obj_dict
 
     def get_policy(self, npc_id, idx=0):
+        print("get policy", npc_id)
         if npc_id.lower().startswith("rllib"):
             try:
                 # Loading rllib agents requires additional helpers
@@ -687,6 +689,8 @@ class OvercookedGame(Game):
             try:
                 fpath = os.path.join(AGENT_DIR, npc_id, "agent.pickle")
                 with open(fpath, "rb") as f:
+                    print("numpy works", np.__version__)
+                    return dill.load(f)  # due to bulletin error
                     return pickle.load(f)
             except Exception as e:
                 raise IOError("Error loading agent\n{}".format(e.__repr__()))
