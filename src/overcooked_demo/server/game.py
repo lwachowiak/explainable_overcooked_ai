@@ -21,6 +21,9 @@ from overcooked_ai_py.planning.planners import (
     MotionPlanner,
 )
 
+# new agents
+from popf_agent import POPFAgent
+
 # Relative path to where all static pre-trained agents are stored on server
 AGENT_DIR = None
 
@@ -673,7 +676,11 @@ class OvercookedGame(Game):
         return obj_dict
 
     def get_policy(self, npc_id, idx=0):
-        print("get policy", npc_id)
+        print("get policy", npc_id, flush=True)
+
+        if npc_id.lower().startswith("Popf"):
+            return POPFAgent()
+
         if npc_id.lower().startswith("rllib"):
             try:
                 # Loading rllib agents requires additional helpers
@@ -689,7 +696,7 @@ class OvercookedGame(Game):
             try:
                 fpath = os.path.join(AGENT_DIR, npc_id, "agent.pickle")
                 with open(fpath, "rb") as f:
-                    print("numpy works", np.__version__)
+                    print("numpy works", np.__version__, flush=True)
                     return dill.load(f)  # due to bulletin error
                     return pickle.load(f)
             except Exception as e:

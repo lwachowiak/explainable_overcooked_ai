@@ -226,16 +226,17 @@ class PopfAgent(Agent):
     """
 
     def __init__(self, sim_threads=None, all_actions=False, custom_wait_prob=None):
-        print("Popf agent initiated")
+        print("Popf agent initiated", flush=True)
         self.sim_threads = sim_threads
         self.all_actions = all_actions
         self.custom_wait_prob = custom_wait_prob
 
     def action(self, state):
-        print("Current State", state)
+        import numpy as np
+        print("Current State", state, flush=True)
         action_probs = np.zeros(Action.NUM_ACTIONS)
         legal_actions = list(Action.MOTION_ACTIONS)
-        print("Legal actions", actions)
+        print("Legal actions", actions, flush=True)
         if self.all_actions:
             legal_actions = Action.ALL_ACTIONS
         legal_actions_indices = np.array(

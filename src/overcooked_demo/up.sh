@@ -10,7 +10,6 @@ then
 else
     echo "development"
     export BUILD_ENV=development
-    # Uncomment the following line if there has been an update to overcooked-ai code
     if [[ $1 = re* ]];
     then 
         docker-compose build --no-cache
